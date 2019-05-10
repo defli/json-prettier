@@ -1,13 +1,15 @@
 import './content.css';
+const NAME = "JsonBeatufier";
 
 const BTN_TOGGLE = 'jw-btn-toggle';
 const DOTS = 'jw-dots';
 const COLLAPSED = 'jw-collapsed';
 const VIEWER = 'jw-viewer';
 const BODY = 'jw-body';
+const BODY_ACTIVE = 'jw-body--active';
 const PRE = 'jw-pre';
 
-const bindToggleClicked = () => {
+const bindToggleClick = () => {
   document.addEventListener('click', evt => {
     const $elm = evt.target;
     const $classList = $elm.parentNode.classList;
@@ -25,15 +27,38 @@ const bindToggleClicked = () => {
   });
 }
 
+const appendScript = (json) => {
+  const tag = document.createElement('script');
+  const script = `window.LOG = ${JSON.stringify(json)}`;
+  const txt = document.createTextNode(script);
+  tag.appendChild(txt);
+  document.body.appendChild(tag);
+}
+
 const prepare = (content) => {
-  const port = chrome.runtime.connect({name: 'knockknock'});
+  const port = chrome.runtime.connect({name: 'jsonbeauty'});
   port.postMessage({body: content});
   port.onMessage.addListener(function(msg) {
-    const node = document.createElement('div');
+    switch (msg.type) {
+      case 'preparing': 
+        console.log(NAME.toUpperCase() + ': JSON is processing...');
+        break;
 
-    node.classList.add(VIEWER);
-    node.innerHTML = msg.body;
-    document.body.appendChild(node);
+      case 'invalid':
+        document.body.classList.remove(BODY);
+        document.body.firstChild.classList.remove(PRE);
+        break;
+      case 'ready':
+        console.log(NAME.toUpperCase() + ': JSON is ready, type "LOG" for preview in console.');
+
+        const node = document.createElement('div');
+
+        node.classList.add(VIEWER);
+        node.innerHTML = msg.body;
+        document.body.appendChild(node);
+        appendScript(msg.json);
+        break;
+    }
   });
 };
 
@@ -48,9 +73,9 @@ const onLoad = () => {
   document.body.classList.add(BODY);
   firstChild.classList.add(PRE);
 
-  const content = JSON.parse(firstChild.innerText);
+  const content = firstChild.innerText;
   prepare(content);
-  bindToggleClicked();
+  bindToggleClick();
 };
 
-window.addEventListener('load', onLoad);
+document.addEventListener("DOMContentLoaded", onLoad, false);
