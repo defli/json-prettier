@@ -11,19 +11,19 @@
   --cyan: #85c8ce;
 }
 
-
 .jw-body {
   line-height: var(--lineHeight);
-  background: var(--bgColor);
-  color: var(--color);
   margin: 0;
   padding: 20pt 50pt;
+  color: var(--color);
+  background-color: var(--bgColor);
 }
 
 .jw-viewer {
   word-wrap: break-word;
   font-family: monospace;
 }
+
 .jw-pre{
   display: none;
 }
